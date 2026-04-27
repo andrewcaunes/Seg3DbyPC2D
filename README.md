@@ -7,8 +7,18 @@ by *Andrew Caunes, Thierry Chateau, Vincent Fremont*
 
 **Accepted to ICPR 2026! 🎉🥳**
 
-![Overview of the method](imgs/overview_wt_bg.png)
+<p align="center">
+  <img src="imgs/overview_wt_bg.png" alt="Overview of Seg3DbyPC2D" width=90%>
+</p>
 
+<p align="center">
+  <em>
+    Seg3DbyPC2D. Source scenes are rendered into PC2D datasets that train 2D models directly in
+    rendered-view domain. These models are then applied to rendered target views;
+    the resulting predictions are projected back in 3D, fused into pseudo-labels,
+    and used to fine-tune a source-pretrained 3D backbone.
+  </em>
+</p>
 
 ## Code Availability
 
