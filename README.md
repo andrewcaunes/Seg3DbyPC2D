@@ -61,7 +61,7 @@ Prediction or evaluation class systems define the target label spaces:
 - `rare`: a small label space for rare-class experiments;
 - `global_ext`: the broad intermediate taxonomy used internally for conversions.
 
-Important naming note: in the thesis manuscript, the taxonomy called **`uda`** corresponds to the **`dglss`** class system in this file. Use `dglss` in this repository when you want to reproduce that manuscript taxonomy.
+**Important naming note: in the thesis manuscript, the taxonomy called **`uda`** corresponds to the **`dglss`** class system in this file. Use `dglss` in this repository when you want to reproduce that manuscript taxonomy.**
 
 ### Display a Mapping
 
