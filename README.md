@@ -1,6 +1,6 @@
 # Multi-View Projection for Unsupervised Domain Adaptation in 3D Semantic Segmentation
 
-Official Repository of the method **Seg3DbyPC2D**. More details can be found in the paper:
+Official Repository of the method **Seg3DbyPC2D** (And **Seg3Dby2D**). More details can be found in the paper:
 
 **Multi-View Projection for Unsupervised Domain Adaptation in 3D Semantic Segmentation**, (preprint) [[arXiv](https://arxiv.org/abs/2505.15545v3)]
 by *Andrew Caunes, Thierry Chateau, Vincent Frémont*
@@ -8,13 +8,12 @@ by *Andrew Caunes, Thierry Chateau, Vincent Frémont*
 ![Overview of the method](imgs/overview_wt_bg.png)
 
 
-# Reproducibility Statement
-
-
 ## Code availability
-
-
-## Metric calculation
+Code is not made available for now for intellectual property reasons.
+In this repository, for reproducibility, we provide:
+- Exact class mappings
+- Data preparation utilities
+- Metrics computation details
 
 ## Classes Mappings
 
