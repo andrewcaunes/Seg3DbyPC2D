@@ -5,7 +5,10 @@ Official repository of the method **Seg3DbyPC2D** and **Seg3Dby2D**. More detail
 **Multi-View Projection for Unsupervised Domain Adaptation in 3D Semantic Segmentation**, ICPR 2026 [[arXiv](https://arxiv.org/abs/2505.15545v3)]
 by *Andrew Caunes, Thierry Chateau, Vincent Fremont*
 
+**Accepted to ICPR 2026! 🎉🥳**
+
 ![Overview of the method](imgs/overview_wt_bg.png)
+
 
 ## Code Availability
 
