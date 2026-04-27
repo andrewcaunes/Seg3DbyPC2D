@@ -275,8 +275,28 @@ Useful options include:
 - `recompute_gt_only=True` to regenerate labels without rewriting the cloud;
 - `blur_intensity_k` or `blur_with_random_intensity` to smooth intensity values.
 
-### Practical Notes
+## Citation
 
-The direct command-line blocks at the bottom of the SemanticKITTI and SynLiDAR scripts are not the primary interface. Use the Python function calls shown above, which expose the actual preparation options.
+If you use this repository, please cite the Seg3DbyPC2D paper. The proceedings citation will be updated when available.
 
-When preparing several scenes, call the same function with several entries in `roots` or `roots_to_dataset`. Existing complete scene folders are skipped unless `re_prepare=True` or `recompute_gt_only=True`.
+```bibtex
+@misc{caunes2026seg3dbypc2d,
+      title={Multi-View Projection for Unsupervised Domain Adaptation in 3D Semantic Segmentation}, 
+      author={Andrew Caunes and Thierry Chateau and Vincent Fremont},
+      year={2026},
+      eprint={2505.15545},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2505.15545}, 
+}
+```
+
+## Acknowledgments
+
+We thank the following projects for their code and resources:
+
+- [MMDetection3D](https://github.com/open-mmlab/mmdetection3d) for training, experiment and evaluation infrastructure.
+- [Pyrender](https://github.com/mmatl/pyrender) for 3D rendering.
+- [NKSR](https://github.com/nv-tlabs/NKSR) for mesh rendering and normal estimation.
+
+This project was provided with computing AI and storage resources by GENCI at IDRIS thanks to the grant `2026-AD011012128R5` on the Jean Zay H100 partition.
