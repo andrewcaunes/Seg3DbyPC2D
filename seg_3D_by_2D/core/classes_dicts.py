@@ -59,10 +59,13 @@ dataset_classes_systems = (
     "nuscenes_uda",
     "nuscenes_dglss",
     "nuscenes_sk19",
+    "nuscenes_ns16",
+    "nuscenes_static",
     "semantickitti_uda",
     "semantickitti_dglss",
     "semantickitti_sk19",
     "semantickitti_ns16",
+    "semantickitti_static",
     "waymo",
     "synlidar",
     "synlidar_dglss",
@@ -77,6 +80,7 @@ pred_classes_systems = (
     "dglss", # from https://ieeexplore.ieee.org/document/10203512/
     "sk19",
     "ns16",
+    "static",
     "rare",
     "global_ext"
 )
@@ -122,6 +126,7 @@ global_ext_classes=(
         "construction_vehicle",
         "ego_vehicle",
         "on_rails",
+        "trailer", # latest addition
     "pedestrian",
         "bicyclist",
         "motorcyclist",
@@ -131,49 +136,77 @@ global_ext_classes=(
     "animal",
 )
 
+def generate_colors(n_colors=256, n_samples=5000):
+    """
+    Generate a set of colors using k-means clustering in LAB color space.
+    returns a numpy array of shape (n_colors, 3) with values in [0, 1]
+    """
+    from skimage.color import lab2rgb, rgb2lab
+    from sklearn.cluster import KMeans
+    # Step 1: Random RGB samples
+    np.random.seed(42)
+    rgb = np.random.rand(n_samples, 3)
+    # Step 2: Convert to LAB for perceptual uniformity
+    # print(f"Converting {n_samples} RGB samples to LAB color space...")
+    lab = rgb2lab(rgb.reshape(1, -1, 3)).reshape(-1, 3)
+    # print("Conversion to LAB complete.")
+    # Step 3: k-means clustering in LAB
+    kmeans = KMeans(n_clusters=n_colors, n_init=10)
+    # print(f"Fitting KMeans with {n_colors} clusters on {n_samples} samples...")
+    kmeans.fit(lab)
+    # print("KMeans fitting complete.")
+    centers_lab = kmeans.cluster_centers_
+    # Step 4: Convert LAB back to RGB
+    colors_rgb = lab2rgb(centers_lab.reshape(1, -1, 3)).reshape(-1, 3)
+    colors_rgb = np.clip(colors_rgb, 0, 1)
+
+    colors_rgb = np.concatenate((np.zeros((1, 3)), colors_rgb), axis=0)
+    return colors_rgb
 
 
-color_palette_float = {0:  (np.array([0,0,0])), # color, is_instance_class
-                1:  (np.array([0,1,0])/1.4),
-                2:  (np.array([0,1,1])/1.4),
-                3:  (np.array([1,0,0])/1.4),
-                4:  (np.array([1,0,1])/1.4),
-                5:  (np.array([1,1,0])/1.4),
-                6:  (np.array([0.8,1.1,1.1])/1.2),
-                7:  (np.array([0.8,0,0.8])/1.2),
-                8:  (np.array([0.3,0.8,0])/1.2),
-                9:  (np.array([0.8,0.5,0])/1.2),
-                10: (np.array([0.8,0,0])/1.2),
-                11: (np.array([0.8,0.5,0.5])/1.2),
-                12: (np.array([0.2,0.8,0.4])),
-                13: (np.array([0.5,0.2,0.7])),
-                14: (np.array([0.2,0.8,0.8])),
-                15: (np.array([0.8,0.8,0.8])),
-                16: (np.array([0.1,0.9,0.3])),
-                17: (np.array([0.4,0,0.6])),
-                18: (np.array([0.6,0.1,0.4])),
-                19: (np.array([0.4,0.7,0.4])),
-                20: (np.array([0.6,0.4,0.6])),
-                21: (np.array([0.4,0.3,0.2])),
-                22: (np.array([0.6,0.7,0.2])),
-                23: (np.array([0.4,0.1,0.8])),
-                24: (np.array([0.7,0.3,0.5])),
-                25: (np.array([0.2,0.5,0.3])),
-                26: (np.array([0.5,0.9,0.1])),
-                27: (np.array([0.1,0.4,0.9])),
-                28: (np.array([0.8,0.2,0.3])),
-                29: (np.array([0.3,0.6,0.7])),
-                30: (np.array([0.9,0.5,0.8])),
-                31: (np.array([0.5,0.5,0.2])),
-                32: (np.array([0.2,0.2,0.5])),
-                33: (np.array([0.7,0.7,0.4])),
-                34: (np.array([0.4,0.7,0.7])),
-                35: (np.array([0.9,0.4,0.2])),
-                36: (np.array([0.2,0.4,0.9])),
-                37: (np.array([0.6,0.9,0.6])),
-                38: (np.array([0.9,0.6,0.9])),
-                39: (np.array([0.3,0.3,0.8])),
-            }
+color_palette_float = generate_colors(n_colors=256, n_samples=5000)
+
+# color_palette_float = {0:  (np.array([0,0,0])), # color, is_instance_class
+#                 1:  (np.array([0,1,0])/1.4),
+#                 2:  (np.array([0,1,1])/1.4),
+#                 3:  (np.array([1,0,0])/1.4),
+#                 4:  (np.array([1,0,1])/1.4),
+#                 5:  (np.array([1,1,0])/1.4),
+#                 6:  (np.array([0.8,1.1,1.1])/1.2),
+#                 7:  (np.array([0.8,0,0.8])/1.2),
+#                 8:  (np.array([0.3,0.8,0])/1.2),
+#                 9:  (np.array([0.8,0.5,0])/1.2),
+#                 10: (np.array([0.8,0,0])/1.2),
+#                 11: (np.array([0.8,0.5,0.5])/1.2),
+#                 12: (np.array([0.2,0.8,0.4])),
+#                 13: (np.array([0.5,0.2,0.7])),
+#                 14: (np.array([0.2,0.8,0.8])),
+#                 15: (np.array([0.8,0.8,0.8])),
+#                 16: (np.array([0.1,0.9,0.3])),
+#                 17: (np.array([0.4,0,0.6])),
+#                 18: (np.array([0.6,0.1,0.4])),
+#                 19: (np.array([0.4,0.7,0.4])),
+#                 20: (np.array([0.6,0.4,0.6])),
+#                 21: (np.array([0.4,0.3,0.2])),
+#                 22: (np.array([0.6,0.7,0.2])),
+#                 23: (np.array([0.4,0.1,0.8])),
+#                 24: (np.array([0.7,0.3,0.5])),
+#                 25: (np.array([0.2,0.5,0.3])),
+#                 26: (np.array([0.5,0.9,0.1])),
+#                 27: (np.array([0.1,0.4,0.9])),
+#                 28: (np.array([0.8,0.2,0.3])),
+#                 29: (np.array([0.3,0.6,0.7])),
+#                 30: (np.array([0.9,0.5,0.8])),
+#                 31: (np.array([0.5,0.5,0.2])),
+#                 32: (np.array([0.2,0.2,0.5])),
+#                 33: (np.array([0.7,0.7,0.4])),
+#                 34: (np.array([0.4,0.7,0.7])),
+#                 35: (np.array([0.9,0.4,0.2])),
+#                 36: (np.array([0.2,0.4,0.9])),
+#                 37: (np.array([0.6,0.9,0.6])),
+#                 38: (np.array([0.9,0.6,0.9])),
+#                 39: (np.array([0.3,0.3,0.8])),
+#             }
 color_palette = np.array([[0,0,0],
                         [0,182,0],
                         [0,182,182],
@@ -625,6 +658,7 @@ global_to_waymo = {
     "wheelchair": "pedestrian",
     "personal_mobility": "pedestrian",
     "animal": "other", 
+    "trailer": "background",
 }
 waymo_classes_system = classes_system(waymo_classes)
 waymo_classes_system.set_to_global(disembiguation_dict=waymo_to_global, background_class="background")
@@ -699,7 +733,8 @@ nuscenes_global_to_global = {
     "static.vegetation": "vegetation",
     "static.other": "manmade",
     "vehicle.ego": "ego_vehicle",
-    "on_rails": "other_vehicle" # not in global, but in global_ext
+    "on_rails": "other_vehicle", # not in global, but in global_ext
+    "trailer": "background"
 }
 global_to_nuscenes={key: "noise" for key in global_ext_classes}
 nuscenes_global_classes_system = classes_system(nuscenes_global_classes)
@@ -818,7 +853,8 @@ global_to_nuscenes_sk19 = {"background": "noise",
                         "stroller":"human.pedestrian.stroller",
                         "wheelchair":"human.pedestrian.wheelchair",
                         "personal_mobility":"human.pedestrian.personal_mobility", # e.g. scooter,
-                        "other_ground":"noise"
+                        "other_ground":"noise",
+                        "trailer": "noise",
                     }
 nuscenes_sk19_classes_system = classes_system(nuscenes_sk19_classes)
 nuscenes_sk19_classes_system.set_to_global(disembiguation_dict=nuscenes_sk19_to_global, background_class="background")
@@ -937,7 +973,8 @@ global_to_nuscenes_uda = {"background": "noise",
                         "stroller":"human.pedestrian.stroller",
                         "wheelchair":"human.pedestrian.wheelchair",
                         "personal_mobility":"human.pedestrian.personal_mobility", # e.g. scooter,
-                        "other_ground":"noise"
+                        "other_ground":"noise",
+                        "trailer": "noise",
                     }
 nuscenes_uda_classes_system = classes_system(nuscenes_uda_classes)
 nuscenes_uda_classes_system.set_to_global(disembiguation_dict=nuscenes_uda_to_global, background_class="background")
@@ -1054,12 +1091,153 @@ global_to_nuscenes_dglss = {"background": "noise",
                         "wheelchair":"human.pedestrian.wheelchair",
                         "personal_mobility":"human.pedestrian.personal_mobility", # e.g. scooter,
                         "other_ground":"noise",
-
+                        "trailer": "noise",
                         "on_rails": "noise" # not in uda, but in global_ext
                     }
 nuscenes_dglss_classes_system = classes_system(nuscenes_dglss_classes)
 nuscenes_dglss_classes_system.set_to_global(disembiguation_dict=nuscenes_dglss_to_global, background_class="background")
 nuscenes_dglss_classes_system.set_from_global(disembiguation_dict=global_to_nuscenes_dglss, background_class="noise")
+
+# Checked to follow exactly 
+# https://www.nuscenes.org/lidar-segmentation?externalData=all&mapData=all&modalities=Any
+nuscenes_ns16_classes = (
+    "noise",
+    "animal",
+    "human.pedestrian.adult",
+    "human.pedestrian.child",
+    "human.pedestrian.construction_worker",
+    "human.pedestrian.personal_mobility",
+    "human.pedestrian.police_officer",
+    "human.pedestrian.stroller",
+    "human.pedestrian.wheelchair",
+    "movable_object.barrier",
+    "movable_object.debris",
+    "movable_object.pushable_pullable",
+    "movable_object.trafficcone",
+    "static_object.bicycle_rack",
+    "vehicle.bicycle",
+    "vehicle.bus.bendy",
+    "vehicle.bus.rigid",
+    "vehicle.car",
+    "vehicle.construction",
+    "vehicle.emergency.ambulance",
+    "vehicle.emergency.police",
+    "vehicle.motorcycle",
+    "vehicle.trailer",
+    "vehicle.truck",
+    "flat.driveable_surface",
+    "flat.other",
+    "flat.sidewalk",
+    "flat.terrain",
+    # "flat.other",
+    "static.manmade",
+    "static.other",
+    "static.vegetation",
+    "vehicle.ego",
+    # "static.other",
+)
+# "background",
+#         "barrier",
+#         "bicycle",
+#         "bus",
+#         "car",
+#         "construction_vehicle",
+#         "motorcycle",
+#         "pedestrian",
+#         "traffic_cone",
+#         "trailer",
+#         "truck",
+#         "driveable_surface",
+#         "other_flat",
+#         "sidewalk",
+#         "terrain",
+#         "manmade",
+#         "vegetation"
+nuscenes_ns16_to_global = {
+    "noise": "background",
+    "animal": "animal",
+    "human.pedestrian.adult": "pedestrian",
+    "human.pedestrian.child": "pedestrian",
+    "human.pedestrian.construction_worker": "pedestrian",
+    "human.pedestrian.personal_mobility": "personal_mobility",
+    "human.pedestrian.police_officer": "pedestrian",
+    "human.pedestrian.stroller": "stroller",
+    "human.pedestrian.wheelchair": "wheelchair",
+    "movable_object.barrier": "barrier",
+    "movable_object.debris": "background",
+    "movable_object.pushable_pullable": "background",
+    "movable_object.trafficcone": "traffic_cone",
+    "static_object.bicycle_rack": "background",
+    "vehicle.bicycle": "bicycle",
+    "vehicle.bus.bendy": "bus",
+    "vehicle.bus.rigid": "bus",
+    "vehicle.car": "car",
+    "vehicle.construction": "construction_vehicle",
+    "vehicle.emergency.ambulance": "emergency_vehicle",
+    "vehicle.emergency.police": "emergency_vehicle",
+    "vehicle.motorcycle": "motorcycle",
+    "vehicle.trailer": "trailer",
+    "vehicle.truck": "truck",
+    "flat.driveable_surface": "road",
+    "flat.sidewalk": "sidewalk",
+    "flat.terrain": "terrain",
+    "flat.other": "other_ground", # dglss puts kitti's "other_ground" as background, but flat.other is not specified in the table
+    "static.manmade": "manmade",
+    "static.vegetation": "vegetation",
+    "static.other": "background",
+    "vehicle.ego": "ego_vehicle",
+}
+global_to_nuscenes_ns16 = {"background": "noise",
+                        "road": "flat.driveable_surface",
+                        "drivable": "flat.driveable_surface",
+                        "sidewalk": "flat.sidewalk",
+                        "manmade": "static.manmade",
+                        "building": "static.manmade",
+                        "vegetation": "static.vegetation",
+                        "trunk": "static.vegetation",
+                        "terrain": "flat.terrain",
+                        "parking": "flat.driveable_surface",
+                        "road_marking": "flat.driveable_surface",
+                        "traffic_sign": "static.manmade",
+                        "other_sign": "static.manmade",
+                        "traffic_light": "static.manmade",
+                        "pothole": "flat.driveable_surface",
+                        "manhole": "flat.driveable_surface",
+                        "street_light": "static.manmade",
+                        "pole": "static.manmade",
+                        "car": "vehicle.car",
+                        "wall": "static.manmade",
+                        "sky": "flat.other",
+                        "pedestrian": "human.pedestrian.adult",
+                        "bicycle": "vehicle.bicycle",
+                        "motorcycle": "vehicle.motorcycle",
+                        "truck": "vehicle.truck",
+                        "other_vehicle": "vehicle.truck",
+                        "vehicle": "vehicle.car",
+                        "emergency_vehicle": "vehicle.emergency.ambulance",
+                        "bus": "vehicle.bus.rigid",
+                        "traffic_cone": "movable_object.trafficcone",
+                        "construction_vehicle": "vehicle.construction",
+                        "barrier": "movable_object.barrier",
+                        "ego_vehicle": "vehicle.ego",
+                        "animal": "animal",
+                        "bicyclist":"vehicle.bicycle",
+                        "motorcyclist":"vehicle.motorcycle",
+                        "stroller":"human.pedestrian.stroller",
+                        "wheelchair":"human.pedestrian.wheelchair",
+                        "personal_mobility":"human.pedestrian.personal_mobility", # e.g. scooter,
+                        "other_ground":"noise",
+                        "trailer": "noise",
+
+                        "on_rails": "noise" # not in uda, but in global_ext
+                    }
+nuscenes_ns16_classes_system = classes_system(nuscenes_ns16_classes)
+nuscenes_ns16_classes_system.set_to_global(disembiguation_dict=nuscenes_ns16_to_global, background_class="background")
+nuscenes_ns16_classes_system.set_from_global(disembiguation_dict=global_to_nuscenes_ns16, background_class="noise")
+
+nuscenes_static_classes_system = classes_system(nuscenes_global_classes)
+nuscenes_static_classes_system.set_to_global(disembiguation_dict=nuscenes_global_to_global, background_class="background")
+nuscenes_static_classes_system.set_from_global(disembiguation_dict=global_to_nuscenes_uda, background_class="noise")
 
 
 semantickitti_global_inds_to_cls = {
@@ -1135,6 +1313,7 @@ semantickitti_global_to_global = {
     "moving-bus": "bus",
     "moving-truck": "truck",
     "moving-other-vehicle": "other_vehicle",
+    "trailer": "unlabeled",
 }
 global_to_semantickitti_global={key: "unlabeled" for key in global_ext_classes}
 semantickitti_global_classes_system = classes_system(semantickitti_global_classes, inds=semantickitti_global_inds)
@@ -1259,6 +1438,7 @@ global_to_semantickitti_uda = {
     "wheelchair":"unlabeled",
     "personal_mobility":"unlabeled",
     "other_ground":"unlabeled",
+    "trailer": "unlabeled",
 
     "on_rails": "unlabeled" # not in uda, but in global_ext
 }
@@ -1383,6 +1563,7 @@ global_to_semantickitti_dglss = { # Useless for UDA exps ?
     "motorcyclist":"unlabeled",
     "stroller":"unlabeled",
     "wheelchair":"unlabeled",
+    "trailer": "unlabeled",
     "personal_mobility":"unlabeled", # e.g. scooter
     "on_rails": "unlabeled" # not in uda, but in global_ext
 }
@@ -1513,7 +1694,8 @@ global_to_semantickitti_sk19 = { # Useless for UDA exps ?
     "stroller":"unlabeled",
     "wheelchair":"unlabeled",
     "personal_mobility":"unlabeled", # e.g. scooter
-    "on_rails": "unlabeled" # not in uda, but in global_ext
+    "on_rails": "unlabeled", # not in uda, but in global_ext
+    "trailer": "unlabeled",
 }
 
 semantickitti_sk19_classes_system = classes_system(semantickitti_sk19_classes, inds=semantickitti_sk19_inds)
@@ -1629,7 +1811,7 @@ global_to_semantickitti_ns16 = { # Useless for UDA exps ?
     "emergency_vehicle": "other-vehicle",
     "bus": "bus",
     "other_vehicle": "other-vehicle",
-    "construction_vehicle": "other-vehicle",
+    "construction_vehicle": "other-vehicle", 
     "ego_vehicle": "unlabeled",
     "pedestrian": "person",
     "animal": "unlabeled",
@@ -1638,12 +1820,17 @@ global_to_semantickitti_ns16 = { # Useless for UDA exps ?
     "stroller":"unlabeled",
     "wheelchair":"unlabeled",
     "personal_mobility":"unlabeled", # e.g. scooter
-    "on_rails": "unlabeled" # not in uda, but in global_ext
+    "on_rails": "unlabeled", # not in uda, but in global_ext
+    "trailer": "unlabeled", 
 }
 
 semantickitti_ns16_classes_system = classes_system(semantickitti_ns16_classes, inds=semantickitti_ns16_inds)
 semantickitti_ns16_classes_system.set_to_global(disembiguation_dict=semantickitti_ns16_to_global, background_class="background")
 semantickitti_ns16_classes_system.set_from_global(disembiguation_dict=global_to_semantickitti_ns16, background_class="unlabeled")
+
+semantickitti_static_classes_system = classes_system(semantickitti_global_classes, inds=semantickitti_global_inds)
+semantickitti_static_classes_system.set_to_global(disembiguation_dict=semantickitti_global_to_global, background_class="background")
+semantickitti_static_classes_system.set_from_global(disembiguation_dict=global_to_semantickitti_uda, background_class="unlabeled")
 
 
 # semantickitti_rare_classes for conversion to rare classes
@@ -1763,7 +1950,8 @@ global_to_semantickitti_rare_classes = { # Arbitrarily filled, doesn't matter a 
     "stroller":"unlabeled",
     "wheelchair":"unlabeled",
     "personal_mobility":"unlabeled", # e.g. scooter
-    "on_rails": "unlabeled" # not in uda, but in global_ext
+    "on_rails": "unlabeled", # not in uda, but in global_ext
+    "trailer": "unlabeled",
 }
 
 semantickitti_rare_classes_system = classes_system(semantickitti_rare_classes, inds=semantickitti_rare_classes_inds)
@@ -1888,7 +2076,8 @@ global_to_synlidar_sk19 = {
     "personal_mobility": "unlabeled",
     "animal": "unlabeled",
     "sky": "unlabeled",
-    "on_rails": "unlabeled" # not in uda, but in global_ext
+    "on_rails": "unlabeled",
+    "trailer": "unlabeled",
 }
 synlidar_sk19_classes_system = classes_system(synlidar_sk19_classes)
 synlidar_sk19_classes_system.set_to_global(disembiguation_dict=synlidar_sk19_to_global, background_class="background")
@@ -2010,7 +2199,8 @@ global_to_synlidar_dglss = {
     "stroller": "unlabeled",
     "wheelchair": "unlabeled",
     "personal_mobility": "unlabeled",
-    "on_rails": "unlabeled"
+    "on_rails": "unlabeled",
+    "trailer": "unlabeled",
 }
 
 synlidar_dglss_classes_system = classes_system(synlidar_dglss_classes)
@@ -2072,8 +2262,8 @@ global_to_uda = {
     "wheelchair":"background",
     "personal_mobility":"background",
     "other_ground":"background",
-
-    "on_rails": "background" # not in uda, but in global_ext
+    "on_rails": "background",
+    "trailer": "background",
 }
 uda_classes_system = classes_system(uda_classes)
 uda_classes_system.set_to_global(disembiguation_dict=uda_to_global, background_class="background")
@@ -2140,8 +2330,8 @@ global_to_dglss = {
     "personal_mobility":"background",
     "animal":"background",
     "other_ground":"background",
-
-    "on_rails": "background" # not in uda, but in global_ext
+    "on_rails": "background",
+    "trailer": "background",
 }
 dglss_classes_system = classes_system(dglss_classes)
 dglss_classes_system.set_to_global(disembiguation_dict=dglss_to_global, background_class="background")
@@ -2221,6 +2411,7 @@ global_to_sk19 = {
     "wheelchair":"background",
     "personal_mobility":"background",
     "animal":"background",
+    "trailer": "background",
 }
 sk19_classes_system = classes_system(sk19_classes)
 sk19_classes_system.set_to_global(disembiguation_dict=sk19_to_global, background_class="background")
@@ -2283,7 +2474,7 @@ global_to_ns16 = {
     "emergency_vehicle":"background", # from https://www.nuscenes.org/lidar-segmentation?externalData=all&mapData=all&modalities=Any
     "bus":"bus",
     "other_vehicle":"background",
-    "construction_vehicle":"background",
+    "construction_vehicle":"construction_vehicle",
     "ego_vehicle":"background",
     "on_rails":"background",
     "pedestrian":"pedestrian",
@@ -2293,10 +2484,70 @@ global_to_ns16 = {
     "wheelchair":"background",
     "personal_mobility":"background",
     "animal":"background",
+    "trailer": "trailer",
 }
 ns16_classes_system = classes_system(ns16_classes)
 ns16_classes_system.set_to_global(disembiguation_dict=ns16_to_global, background_class="background")
 ns16_classes_system.set_from_global(disembiguation_dict=global_to_ns16, background_class="background")
+
+## static
+static_classes = (
+    "background",
+    "road",
+    "sidewalk",
+    "manmade",
+    "terrain",
+    "vegetation",
+)
+static_to_global = {}
+global_to_static = {
+    "background": "background",
+    "drivable": "road",
+    "road": "road",
+    "parking": "road",
+    "road_marking": "road",
+    "other_ground": "terrain",
+    "sidewalk": "sidewalk",
+    "terrain": "terrain",
+    "sky": "background",
+    "manmade": "manmade",
+    "building": "manmade",
+    "traffic_sign": "manmade",
+    "other_sign": "manmade",
+    "traffic_light": "manmade",
+    "pothole": "road",
+    "manhole": "road",
+    "street_light": "manmade",
+    "pole": "manmade",
+    "traffic_cone": "manmade",
+    "wall": "manmade",
+    "barrier": "manmade",
+    "fence": "manmade",
+    "vegetation": "vegetation",
+    "trunk": "vegetation",
+    "vehicle": "background",
+    "car": "background",
+    "bicycle": "background",
+    "motorcycle": "background",
+    "truck": "background",
+    "emergency_vehicle": "background",
+    "bus": "background",
+    "other_vehicle": "background",
+    "construction_vehicle": "background",
+    "ego_vehicle": "background",
+    "on_rails": "background",
+    "trailer": "background",
+    "pedestrian": "background",
+    "bicyclist": "background",
+    "motorcyclist": "background",
+    "stroller": "background",
+    "wheelchair": "background",
+    "personal_mobility": "background",
+    "animal": "background",
+}
+static_classes_system = classes_system(static_classes)
+static_classes_system.set_to_global(disembiguation_dict=static_to_global, background_class="background")
+static_classes_system.set_from_global(disembiguation_dict=global_to_static, background_class="background")
 
 ## rare
 # Rare classes system, used for "rare classes" experiment (seg_3D_by_PC2D as pretraining for IV24)
@@ -2354,6 +2605,7 @@ global_to_rare = {
     "wheelchair": "background",
     "personal_mobility": "background",
     "animal": "background",
+    "trailer": "background",
 }
 rare_classes_system = classes_system(rare_classes)
 rare_classes_system.set_to_global(disembiguation_dict=rare_to_global, background_class="background")
