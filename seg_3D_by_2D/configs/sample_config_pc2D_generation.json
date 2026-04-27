@@ -1,0 +1,14 @@
+[ 
+    {
+      "view_mode": ["car_view", "top_view", "bottom_view", "conic_view"],
+      "num_camera_poses": [80, 20, 20, 80],
+      "num_camera_poses_val" : [20, 5, 5, 20],
+      "random_yaw": [30, 0, 0, 0],
+      "random_roll": [0, 180, 180, 0],
+      "random_altitude": [0, 10, 10, 0],
+      "random_offset": [1, 1, 1, 0],
+      "view_modality": ["pc2D_multi_3_pfl"],
+      "image_point_size": [2],
+      "label_point_size": [2]
+    }
+]
